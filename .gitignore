@@ -1,0 +1,16 @@
+# Secrets
+.env
+
+# Generated output — regenerable, not source
+chart_output.png
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+venv/
+.venv/
+*.egg-info/
+
+# OS
+.DS_Store
