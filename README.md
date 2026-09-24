@@ -95,6 +95,41 @@ This loop is capped at 3 attempts — a deliberate cost control, since each retr
 
 This is a small eval set, not a comprehensive one — a production version would include more edge cases (ambiguous questions, multi-step questions, questions with no valid answer in the data) and track pass rate over time as the prompt/logic evolves.
 
+## LangGraph Comparison
+
+To deepen my understanding of agentic control flow, I rebuilt the
+generate→execute retry loop using LangGraph — a graph-based framework
+built for exactly this kind of stateful, looping logic, unlike LangChain's
+linear `|` chaining (LCEL), which can't express "try again if this fails."
+
+```bash
+python3 scripts/run_langgraph_demo.py datasets/titanic.csv "What was the average age of passengers?"
+```
+
+Enable LangSmith tracing by setting `LANGSMITH_TRACING=true` and
+`LANGSMITH_API_KEY` in `.env`.
+
+**What I found comparing the two:**
+- The hand-built version's retry loop is a plain Python `for` loop with
+  manual state tracking (`previous_code`, `previous_error`). LangGraph
+  makes that same control flow explicit as a graph — nodes
+  (`generate_code`, `execute_code`, `explain_result`) and a router
+  function that decides whether to loop back or move on, based on shared
+  state. For a loop this simple, the hand-built for-loop is arguably
+  easier to read; LangGraph's value shows up more clearly in graphs with
+  multiple branches or parallel paths, not a single linear retry.
+- Hit a real, undocumented issue: this version of `langchain-google-genai`
+  returns `response.content` as a list of content blocks (not a plain
+  string) when the model does internal reasoning — verified via direct
+  inspection (`type()` and `repr()`) rather than guessing, then handled
+  with a small adapter function.
+- Verified the retry/stop routing logic with direct unit tests against
+  fabricated states (`tests/test_agent_langgraph.py`), rather than relying
+  on the LLM happening to fail on a live run — the model often writes
+  defensive code that avoids errors entirely, so testing the router
+  function in isolation was the only reliable way to confirm the loop
+  and stop conditions are actually correct.
+
 ## Known limitations
 
 - **Occasional code-syntax leakage into natural-language answers.** `explain_result()` has, in testing, occasionally echoed Python assignment syntax (e.g., starting an answer with `result = "..."`) instead of pure prose. The underlying information was still correct; this is a cosmetic prompt-following issue, not a correctness bug.

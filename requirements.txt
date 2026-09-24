@@ -2,3 +2,7 @@ google-genai>=1.0.0
 pandas>=2.0.0
 matplotlib>=3.8.0
 python-dotenv>=1.0.0
+langchain>=1.0.0
+langchain-google-genai>=4.0.0
+langgraph>=1.2.0
+langsmith>=0.14.0
