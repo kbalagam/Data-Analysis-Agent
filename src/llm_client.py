@@ -23,6 +23,12 @@ from src.config import MODEL, MAX_API_RETRIES, RETRYABLE_STATUS_CODES
 def get_client() -> genai.Client:
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
+        try:
+            import streamlit as st
+            api_key = st.secrets.get("GEMINI_API_KEY")
+        except Exception:
+            api_key = None
+    if not api_key:
         print("ERROR: Set GEMINI_API_KEY environment variable first.")
         print("  export GEMINI_API_KEY=your_key_here  (or put it in .env)")
         sys.exit(1)

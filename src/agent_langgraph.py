@@ -10,7 +10,6 @@ LangChain has no opinion about sandboxing).
 import os
 import re
 from typing import TypedDict, Optional, Any
-from urllib import response
 
 import pandas as pd
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -89,9 +88,16 @@ class AgentState(TypedDict):
 
 
 def _llm() -> ChatGoogleGenerativeAI:
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        try:
+            import streamlit as st
+            api_key = st.secrets.get("GEMINI_API_KEY")
+        except Exception:
+            api_key = None
     return ChatGoogleGenerativeAI(
         model=MODEL,
-        google_api_key=os.environ.get("GEMINI_API_KEY"),
+        google_api_key=api_key,
     )
 
 
