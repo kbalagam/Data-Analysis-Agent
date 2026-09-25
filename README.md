@@ -67,6 +67,15 @@ Run the eval suite (against the Titanic dataset, or any CSV with matching questi
 python3 eval_agent.py datasets/titanic.csv
 ```
 
+Run the UI:
+```bash
+streamlit run app.py
+```
+
+The UI includes a toggle to run either the hand-built retry loop or the
+LangGraph version on the same question, and displays the generated pandas
+code alongside the answer.
+
 ## Sandboxing: the core safety mechanism
 
 The model generates arbitrary Python as text; `run_code_safely()` executes it in a restricted environment built on an **allowlist** principle, not a blocklist:
@@ -130,6 +139,10 @@ Enable LangSmith tracing by setting `LANGSMITH_TRACING=true` and
   function in isolation was the only reliable way to confirm the loop
   and stop conditions are actually correct.
 
+The Streamlit UI (`app.py`) includes a toggle to run either implementation
+side-by-side on the same question, with the generated pandas code shown
+alongside the answer for transparency.
+
 ## Known limitations
 
 - **Occasional code-syntax leakage into natural-language answers.** `explain_result()` has, in testing, occasionally echoed Python assignment syntax (e.g., starting an answer with `result = "..."`) instead of pure prose. The underlying information was still correct; this is a cosmetic prompt-following issue, not a correctness bug.
@@ -144,7 +157,6 @@ Enable LangSmith tracing by setting `LANGSMITH_TRACING=true` and
 - Add a hard per-request cost cap using the token tracking already in place
 - Expand the eval set with ambiguous and multi-step questions
 - Add basic prompt-injection awareness — testing what happens if the CSV data itself contains adversarial text
-- Build a small Streamlit UI, matching the RAG project's presentation
 
 ## Tech stack
 
@@ -153,3 +165,5 @@ Enable LangSmith tracing by setting `LANGSMITH_TRACING=true` and
 - **Data:** pandas
 - **Charts:** matplotlib (non-interactive `Agg` backend)
 - **Evaluation:** custom eval script with `math.isclose()` tolerance-based comparison
+- **UI:** Streamlit, with a toggle between hand-built and LangGraph implementations
+- **Also implemented:** LangGraph (+ LangChain, LangSmith) version of the generate→execute retry loop, for direct comparison — see `src/agent_langgraph.py`

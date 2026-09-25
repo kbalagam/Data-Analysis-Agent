@@ -151,6 +151,7 @@ def answer_question(client, question: str, df: pd.DataFrame,
                 "answer": answer,
                 "chart_path": CHART_PATH if chart_created else None,
                 "token_log": token_log,
+                "code": previous_code,
             }
 
         print(f"Code failed on attempt {attempt}:")
@@ -163,6 +164,7 @@ def answer_question(client, question: str, df: pd.DataFrame,
         "answer": None,
         "chart_path": None,
         "token_log": token_log,
+        "code": previous_code,
     }
 
 
